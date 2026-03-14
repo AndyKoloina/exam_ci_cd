@@ -1,4 +1,4 @@
-name: Deploy Cloud Run Function (GSP080)
+name: Deploy GSP080
 
 on:
   push:
@@ -16,22 +16,17 @@ jobs:
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Deploy Node.js Pub/Sub Function
-        uses: google-github-actions/deploy-cloud-functions@v2
+      - name: Deploy Function
+        uses: 'google-github-actions/deploy-cloud-functions@v2'
         with:
           name: nodejs-pubsub-function
           runtime: nodejs20
-          region: europe-west4 # Remplace par la REGION de ton lab
+          region: europe-west4
           gen2: true
           source_dir: .
           entry_point: helloPubSub
-          # Configuration du trigger Pub/Sub
+          # Utilisation de la syntaxe simplifiée pour Gen2 Pub/Sub
           event_trigger_type: google.cloud.pubsub.topic.v1.messagePublished
           event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/topics/cf-demo
-          # Flags spécifiques pour le lab (Staging bucket et Auth)
-          flags: |
-            --stage-bucket=${{ secrets.GCP_PROJECT_ID }}-bucket
-            --no-allow-unauthenticated
+          # Indispensable pour contourner la 403 sur la création de bucket
+          flags: '--stage-bucket=${{ secrets.GCP_PROJECT_ID }}-bucket'
