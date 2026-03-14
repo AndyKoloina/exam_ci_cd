@@ -22,7 +22,7 @@ jobs:
         with:
           name: nodejs-pubsub-function
           runtime: nodejs20
-          region: us-central1
+          region: us-east1
           gen2: true
           source_dir: .
           entry_point: helloPubSub
