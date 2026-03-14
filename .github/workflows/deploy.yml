@@ -32,4 +32,6 @@ jobs:
           event_trigger_type: google.cloud.pubsub.topic.v1.messagePublished
           event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/topics/cf-demo
           # Flags spécifiques pour le lab (Staging bucket et Auth)
-          flags: '--stage-bucket=${{ secrets.GCP_PROJECT_ID }}-bucket'
+          flags: |
+            --stage-bucket=${{ secrets.GCP_PROJECT_ID }}-bucket
+            --no-allow-unauthenticated
