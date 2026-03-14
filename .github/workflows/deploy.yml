@@ -1,15 +1,42 @@
-- name: 'Authenticate to Google Cloud'
+name: CI-CD Google Skills Boost
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    name: Deploy Data Function
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Récupération du code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Authentification avec la clé JSON (Secret GitHub)
+      - name: Authenticate to GCP
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      - name: 'Deploy Cloud Function'
-        uses: 'google-github-actions/deploy-cloud-functions@v2'
+      # 3. Configuration du SDK Google Cloud
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # 4. Déploiement de la Cloud Function
+      - name: Deploy Function
+        uses: google-github-actions/deploy-cloud-functions@v2
         with:
-          name: 'data-cleaner-func'
-          runtime: 'python310'
-          region: 'us-east1' # Vérifie la région autorisée par le lab
-          source_dir: './app'
-          entry_point: 'clean_data_trigger'
-          event_trigger_type: 'google.cloud.storage.object.v1.finalized'
-          event_trigger_resource: 'projects/${{ secrets.GCP_PROJECT_ID }}/buckets/${{ secrets.GCP_PROJECT_ID }}'
+          name: data-cleaner-lab
+          runtime: python310
+          region: us-east1  # Assure-toi que c'est la région autorisée par ton lab
+          source_dir: ./app
+          entry_point: clean_data_trigger
+          event_trigger_type: google.cloud.storage.object.v1.finalized
+          # Le nom du bucket dans les labs est souvent l'ID du projet lui-même
+          event_trigger_resource: projects/${{ secrets.GCP_PROJECT }}/buckets/${{ secrets.GCP_PROJECT }}
+
+      # 5. Message de succès
+      - name: Success Message
+        run: echo "Le déploiement sur le projet ${{ secrets.GCP_PROJECT }} est réussi !"
