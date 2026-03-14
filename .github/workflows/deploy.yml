@@ -1,46 +1,37 @@
-name: CI-CD Google Skills Boost Final
+name: Deploy Cloud Run Function (GSP080)
 
 on:
   push:
     branches: [ main ]
 
-
 jobs:
   deploy:
-    name: Deploy Data Function
     runs-on: ubuntu-latest
-    
     steps:
-      # 1. Récupération du code depuis ton repo GitHub
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Authentification avec la clé JSON du Service Account
       - name: Authenticate to GCP
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      # 3. Installation du SDK Google Cloud
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      # 4. Déploiement de la Cloud Function (Configuration Gen2)
-      - name: Deploy Function
+      - name: Deploy Node.js Pub/Sub Function
         uses: google-github-actions/deploy-cloud-functions@v2
         with:
-          name: data-cleaner-lab
-          runtime: python310
-          region: europe-west4
+          name: nodejs-pubsub-function
+          runtime: nodejs20
+          region: europe-west4 # Remplace par la REGION de ton lab
           gen2: true
-          # On utilise le bucket existant du lab pour le staging du code ZIP
-          flags: '--stage-bucket=${{ secrets.GCP_PROJECT_ID }}-bucket'
-          source_dir: ./app
-          entry_point: clean_data_trigger
-          # Trigger spécifique pour réagir à l'ajout de fichiers dans le bucket
-          event_trigger_type: google.cloud.storage.object.v1.finalized
-          event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/buckets/${{ secrets.GCP_PROJECT_ID }}-bucket
-
-      # 5. Confirmation finale
-      - name: Success Message
-        run: echo "Déploiement terminé avec succès sur le projet ${{ secrets.GCP_PROJECT_ID }}"
+          source_dir: .
+          entry_point: helloPubSub
+          # Configuration du trigger Pub/Sub
+          event_trigger_type: google.cloud.pubsub.topic.v1.messagePublished
+          event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/topics/cf-demo
+          # Flags spécifiques pour le lab (Staging bucket et Auth)
+          flags: |
+            --stage-bucket=${{ secrets.GCP_PROJECT_ID }}-bucket
+            --allow-unauthenticated
