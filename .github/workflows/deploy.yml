@@ -1,0 +1,15 @@
+- name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: 'Deploy Cloud Function'
+        uses: 'google-github-actions/deploy-cloud-functions@v2'
+        with:
+          name: 'data-cleaner-func'
+          runtime: 'python310'
+          region: 'us-east1' # Vérifie la région autorisée par le lab
+          source_dir: './app'
+          entry_point: 'clean_data_trigger'
+          event_trigger_type: 'google.cloud.storage.object.v1.finalized'
+          event_trigger_resource: 'projects/${{ secrets.GCP_PROJECT_ID }}/buckets/${{ secrets.GCP_PROJECT_ID }}'
