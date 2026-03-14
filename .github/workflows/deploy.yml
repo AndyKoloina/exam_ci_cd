@@ -29,8 +29,7 @@ jobs:
         with:
           name: data-cleaner-lab
           runtime: python310
-          region: us-central1
-          gen2: true
+          region: europe-west4
           source_dir: ./app
           entry_point: clean_data_trigger
           event_trigger_type: google.cloud.storage.object.v1.finalized
