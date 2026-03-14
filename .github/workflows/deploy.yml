@@ -6,23 +6,40 @@ on:
 
 jobs:
   deploy:
+    name: Deploy Data Function
     runs-on: ubuntu-latest
+    
     steps:
+      # 1. Récupération du code depuis ton repo GitHub
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # 2. Authentification avec la clé JSON du Service Account
       - name: Authenticate to GCP
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      - name: Deploy Cloud Function
-        uses: 'google-github-actions/deploy-cloud-functions@v2'
+      # 3. Installation du SDK Google Cloud
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # 4. Déploiement de la Cloud Function (Configuration Gen2)
+      - name: Deploy Function
+        uses: google-github-actions/deploy-cloud-functions@v2
         with:
           name: data-cleaner-lab
           runtime: python310
           region: europe-west4
+          gen2: true
+          # On utilise le bucket existant du lab pour le staging du code ZIP
+          flags: '--stage-bucket=${{ secrets.GCP_PROJECT_ID }}-bucket'
           source_dir: ./app
           entry_point: clean_data_trigger
-          event_trigger_type: google.storage.object.finalize
-          event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/buckets/${{ secrets.GCP_PROJECT_ID }}
+          # Trigger spécifique pour réagir à l'ajout de fichiers dans le bucket
+          event_trigger_type: google.cloud.storage.object.v1.finalized
+          event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/buckets/${{ secrets.GCP_PROJECT_ID }}-bucket
+
+      # 5. Confirmation finale
+      - name: Success Message
+        run: echo "Déploiement terminé avec succès sur le projet ${{ secrets.GCP_PROJECT_ID }}"
