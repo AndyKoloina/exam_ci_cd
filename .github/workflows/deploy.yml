@@ -8,7 +8,6 @@ jobs:
   deploy:
     name: Deploy Data Function
     runs-on: ubuntu-latest
-    environment: GCP_SA_KEY
     steps:
       # 1. Récupération du code
       - name: Checkout Code
