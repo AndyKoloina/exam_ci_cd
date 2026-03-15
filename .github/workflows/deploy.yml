@@ -1,37 +1,49 @@
-name: Deploy to GCP
+name: Deploy to Cloud Run
+
+env:
+  SERVICE_NAME: custom-fastapi-service
+  PROJECT_ID: qwiklabs-gcp-01-c014b0ece640
+  DOCKER_IMAGE_URL: us-central1-docker.pkg.dev/qwiklabs-gcp-01-c014b0ece640/custom-fastapi/custom-fastapi
+
 on:
   push:
     branches:
       - main
-
-permissions:
-  contents: 'read'
-  id-token: 'write'
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  deploy:
+  dockerize-and-deploy:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
 
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Google Cloud Auth
         uses: 'google-github-actions/auth@v2'
         with:
-          project_id: 'qwiklabs-gcp-03-8e4b21a31bef'
-          workload_identity_provider: 'projects/464846482145/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
-          service_account: 'github-action-sa@qwiklabs-gcp-03-8e4b21a31bef.iam.gserviceaccount.com'
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          project_id: ${{ env.PROJECT_ID }}
 
-      - name: 'Set up Cloud SDK'
+      - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
 
-      - name: 'Deploy to Cloud Run'
+      - name: Configure Docker
         run: |
-          gcloud run deploy mon-service \
-            --source . \
-            --region europe-west4 \
-            --allow-unauthenticated \
-            --project qwiklabs-gcp-03-8e4b21a31bef \
+          gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ env.DOCKER_IMAGE_URL }}:latest -f Dockerfile.prod .
+          docker push ${{ env.DOCKER_IMAGE_URL }}:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          echo SERVICE_NAME $SERVICE_NAME
+          gcloud run deploy $SERVICE_NAME \
+            --image ${{ env.DOCKER_IMAGE_URL }}:latest \
             --platform managed \
-            --quiet
+            --region us-east1 \
+            --allow-unauthenticated
