@@ -65,5 +65,3 @@ jobs:
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated
-            --port 8080 \
-            --set-env-vars PORT=8080
