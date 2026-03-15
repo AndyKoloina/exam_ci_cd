@@ -28,9 +28,9 @@ jobs:
 
       - name: 'Deploy to Cloud Run'
         run: |
-          gcloud run deploy mon-service \
-            --source . \
-            --region us-central1 \
+          gcloud run deploy tp-cicd-service \
+            --image gcr.io/qwiklabs-gcp-03-8e4b21a31bef/mon-app:${{ github.sha }} \
+            --region europe-west1 \
+            --platform managed \
             --allow-unauthenticated \
-            --project qwiklabs-gcp-03-8e4b21a31bef \
-            --quiet
+            --project qwiklabs-gcp-03-8e4b21a31bef
