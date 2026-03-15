@@ -34,7 +34,7 @@ jobs:
         # On utilise ton PROJECT_ID Qwiklabs en dur ou via secret
         gcloud run deploy tp-cicd-service \
           --image gcr.io/qwiklabs-gcp-03-b2c56e91a232/mon-app:${{ github.sha }} \
-          --region us-west4 \
+          --region us-east1 \
           --platform managed \
           --allow-unauthenticated \
           --project qwiklabs-gcp-03-b2c56e91a232
