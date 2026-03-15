@@ -1,17 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from . import smokeTest
+import os # Importez os
 
-import debugpy
-
-debugpy.listen(("0.0.0.0", 5678))
-# debugpy.wait_for_client()
+# SUPPRIMEZ OU COMMENTEZ debugpy EN PROD
+# import debugpy
+# debugpy.listen(("0.0.0.0", 5678))
 
 app = FastAPI()
 
-origins = [
-    "*"
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,13 +19,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
 app.include_router(smokeTest.router, prefix="/smoke-test")
 
-# Define the API endpoints
 @app.get('/')
 def health():
     return {
-        "message": "OK 🚀 lala"
+        "message": "OK 🚀 lala",
+        "port_used": os.environ.get("PORT", "8080") # Pour vérifier le port
     }
