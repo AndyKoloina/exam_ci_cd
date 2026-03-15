@@ -16,4 +16,5 @@ COPY ./src ./src
 EXPOSE 4000
 
 # start the server
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "4000", "--proxy-headers"]
+# Utilisez "sh -c" pour que la variable d'environnement $PORT soit interprétée
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}"]
