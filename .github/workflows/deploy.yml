@@ -4,7 +4,6 @@ on:
     branches:
       - main
 
-# ÉTAPE CRUCIALE pour Workload Identity
 permissions:
   contents: 'read'
   id-token: 'write'
@@ -16,26 +15,22 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 1. Authentification
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v2'
         with:
-          project_id: 'qwiklabs-gcp-01-e2af46d6a850'
-          workload_identity_provider: 'projects/613125244587/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
-          service_account: 'github-action-sa@qwiklabs-gcp-01-e2af46d6a850.iam.gserviceaccount.com'
+          project_id: 'qwiklabs-gcp-03-8e4b21a31bef'
+          workload_identity_provider: 'projects/464846482145/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: 'github-action-sa@qwiklabs-gcp-03-8e4b21a31bef.iam.gserviceaccount.com'
 
-
-      # 2. Configuration du SDK Cloud
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
 
-      # 3. LE DÉPLOIEMENT (Exemple Cloud Run)
-      # Remplacez 'mon-service' par le nom de votre service dans le lab
       - name: 'Deploy to Cloud Run'
         run: |
           gcloud run deploy mon-service \
             --source . \
             --region us-central1 \
             --allow-unauthenticated \
-            --project qwiklabs-gcp-01-e2af46d6a850
+            --project qwiklabs-gcp-03-8e4b21a31bef \
+            --quiet
