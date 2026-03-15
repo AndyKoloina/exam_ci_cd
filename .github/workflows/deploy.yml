@@ -1,33 +1,40 @@
-name: Deploy GSP080
-
+name: Deploy to GCP
 on:
   push:
     branches: [ main ]
 
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write' # Indispensable pour l'échange de jetons WIF
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Authenticate to GCP
-        uses: 'google-github-actions/auth@v2'
-        with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+    # Authentification via Workload Identity Federation
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v2'
+      with:
+        # Utilisation de ton numéro de projet et de ton provider
+        workload_identity_provider: 'projects/97661285101/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+        # Ton compte de service Compute Engine
+        service_account: '97661285101-compute@developer.gserviceaccount.com'
 
-      - name: Deploy Function
-        uses: 'google-github-actions/deploy-cloud-functions@v2'
-        with:
-          name: nodejs-pubsub-function
-          runtime: nodejs20
-          region: us-east1
-          gen2: true
-          source_dir: .
-          entry_point: helloPubSub
-          # Utilisation de la syntaxe simplifiée pour Gen2 Pub/Sub
-          event_trigger_type: google.cloud.pubsub.topic.v1.messagePublished
-          event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/topics/cf-demo
-          # Indispensable pour contourner la 403 sur la création de bucket
-          flags: '--stage-bucket=${{ secrets.GCP_PROJECT_ID }}-bucket'
+    # Configuration du SDK Google Cloud
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v2'
+
+    # Déploiement sur Cloud Run
+    - name: 'Deploy to Cloud Run'
+      run: |
+        # On utilise ton PROJECT_ID Qwiklabs en dur ou via secret
+        gcloud run deploy tp-cicd-service \
+          --image gcr.io/qwiklabs-gcp-03-b2c56e91a232/mon-app:${{ github.sha }} \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated \
+          --project qwiklabs-gcp-03-b2c56e91a232
