@@ -30,8 +30,13 @@ jobs:
       # 2. Configuration du SDK Google Cloud
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
-
-      # 3. CRÉATION DU DÉPÔT (Si inexistant)
+      # 3.1 ACTIVATION DES API (Crucial pour éviter l'erreur SERVICE_DISABLED)
+      - name: Enable Google Cloud APIs
+        run: |
+          gcloud services enable run.googleapis.com \
+                                 artifactregistry.googleapis.com \
+                                 cloudbuild.googleapis.com --quiet
+      # 3.2 CRÉATION DU DÉPÔT (Si inexistant)
       # Cette étape évite l'erreur "Permission denied (or it may not exist)"
       - name: Create Artifact Registry Repo
         run: |
