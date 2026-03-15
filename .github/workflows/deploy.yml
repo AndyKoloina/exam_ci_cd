@@ -30,7 +30,7 @@ jobs:
         run: |
           gcloud run deploy mon-service \
             --source . \
-            --region us-east1 \
+            --region europe-west4 \
             --allow-unauthenticated \
             --project qwiklabs-gcp-03-8e4b21a31bef \
             --platform managed \
