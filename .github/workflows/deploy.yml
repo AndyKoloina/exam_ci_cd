@@ -30,6 +30,7 @@ jobs:
       # 2. Configuration du SDK Google Cloud
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
+        
       # 3.1 ACTIVATION DES API (Crucial pour éviter l'erreur SERVICE_DISABLED)
       - name: Enable Google Cloud APIs
         run: |
