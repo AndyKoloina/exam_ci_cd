@@ -3,13 +3,12 @@ name: Deploy to Cloud Run
 env:
   SERVICE_NAME: custom-fastapi-service
   PROJECT_ID: qwiklabs-gcp-01-c014b0ece640
+  REGION: us-central1
+  # L'URL de l'image pointe vers le dépôt dans Artifact Registry
   DOCKER_IMAGE_URL: us-central1-docker.pkg.dev/qwiklabs-gcp-01-c014b0ece640/custom-fastapi/custom-fastapi
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
@@ -19,31 +18,44 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
+      # 1. Authentification avec la clé JSON (votre Secret GitHub)
       - name: Google Cloud Auth
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
           project_id: ${{ env.PROJECT_ID }}
 
+      # 2. Configuration du SDK Google Cloud
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
 
+      # 3. CRÉATION DU DÉPÔT (Si inexistant)
+      # Cette étape évite l'erreur "Permission denied (or it may not exist)"
+      - name: Create Artifact Registry Repo
+        run: |
+          gcloud artifacts repositories create custom-fastapi \
+            --repository-format=docker \
+            --location=${{ env.REGION }} \
+            --description="Docker repository for FastAPI" || echo "Le dépôt existe déjà."
+
+      # 4. Configuration de Docker pour s'authentifier auprès de Google
       - name: Configure Docker
         run: |
-          gcloud auth configure-docker us-central1-docker.pkg.dev
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
+      # 5. Build et Push de l'image
       - name: Build and Push Docker Image
         run: |
           docker build -t ${{ env.DOCKER_IMAGE_URL }}:latest -f Dockerfile.prod .
           docker push ${{ env.DOCKER_IMAGE_URL }}:latest
 
+      # 6. Déploiement sur Cloud Run
       - name: Deploy to Cloud Run
         run: |
-          echo SERVICE_NAME $SERVICE_NAME
-          gcloud run deploy $SERVICE_NAME \
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
             --image ${{ env.DOCKER_IMAGE_URL }}:latest \
             --platform managed \
-            --region us-east1 \
+            --region ${{ env.REGION }} \
             --allow-unauthenticated

@@ -6,7 +6,7 @@ spec:
   template:
     spec:
       containers:
-        - image: us-central1-docker.pkg.dev/h-t-d-a-f-a-t-g-c-r/custom-fastapi/custom-fastapi:latest
+        - image: us-central1-docker.pkg.dev/qwiklabs-gcp-01-c014b0ece640/custom-fastapi/custom-fastapi:latest
           env:
           ports:
             - containerPort: 4000
