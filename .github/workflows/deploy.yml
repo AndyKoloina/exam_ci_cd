@@ -38,4 +38,11 @@ jobs:
             --source . \
             --region europe-west1 \
             --allow-unauthenticated \
+            --project qwiklabs-gcp-01-e2af46d6a850- name: 'Deploy to Cloud Run'
+        run: |
+          gcloud run deploy tp-cicd-service \
+            --image gcr.io/qwiklabs-gcp-01-e2af46d6a850/mon-app:${{ github.sha }} \
+            --region europe-west1 \
+            --platform managed \
+            --allow-unauthenticated \
             --project qwiklabs-gcp-01-e2af46d6a850
