@@ -2,10 +2,10 @@ name: Deploy to Cloud Run
 
 env:
   SERVICE_NAME: custom-fastapi-service
-  PROJECT_ID: qwiklabs-gcp-03-93bff2186629
+  PROJECT_ID: qwiklabs-gcp-00-505ad1ebdfb3
   REGION: us-central1
   # L'URL de l'image pointe vers le dépôt dans Artifact Registry
-  DOCKER_IMAGE_URL: us-central1-docker.pkg.dev/qwiklabs-gcp-03-93bff2186629/custom-fastapi/custom-fastapi
+  DOCKER_IMAGE_URL: us-central1-docker.pkg.dev/qwiklabs-gcp-00-505ad1ebdfb3/custom-fastapi/custom-fastapi
 
 on:
   push:
