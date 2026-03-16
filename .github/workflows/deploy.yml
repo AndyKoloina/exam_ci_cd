@@ -12,6 +12,7 @@ on:
     branches:
       - main
 
+
 jobs:
   dockerize-and-deploy:
     runs-on: ubuntu-latest
